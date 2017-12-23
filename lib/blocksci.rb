@@ -1,5 +1,7 @@
-require "blocksci/version"
+require 'blocksci/version'
+require 'bitcoin'
 
-module Blocksci
-  # Your code goes here...
+module BlockSci
+  autoload :Parser, 'blocksci/parser'
+  autoload :CLI, 'blocksci/cli'
 end
