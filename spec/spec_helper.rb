@@ -12,3 +12,7 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 end
+
+def test_configuration
+  BlockSci::Parser::Configuration.new("#{Dir.tmpdir}/blocksci", File.join(File.dirname(__FILE__), 'fixtures/testnet3'))
+end

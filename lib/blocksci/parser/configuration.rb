@@ -13,7 +13,35 @@ module BlockSci
       end
 
       def parser_dir
+        "#{out_dir}/parser"
+      end
 
+      def utxo_cache_file
+        "#{parser_dir}/utxoCache.dat"
+      end
+
+      def utxo_address_state_path
+        "#{parser_dir}/utxoAddressState"
+      end
+
+      def utxo_script_state_path
+        "#{parser_dir}/utxoScriptState"
+      end
+
+      def address_path
+        "#{parser_dir}/address"
+      end
+
+      def block_list_path
+        "#{parser_dir}/blockList.dat"
+      end
+
+      def tx_updates_file_path
+        "#{parser_dir}/txUpdates"
+      end
+
+      def path_for_block_file(file_num)
+        "#{coin_dir}/blocks/blk#{file_num.to_s.rjust(5, '0')}.dat"
       end
 
       private
