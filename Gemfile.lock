@@ -3,6 +3,7 @@ PATH
   specs:
     blockscirb (0.1.0)
       bitcoinrb
+      parallel
 
 GEM
   remote: https://rubygems.org/
@@ -39,6 +40,7 @@ GEM
     mime-types-data (3.2016.0521)
     murmurhash3 (0.1.6)
     netrc (0.11.0)
+    parallel (1.12.1)
     rake (10.5.0)
     rest-client (2.0.2)
       http-cookie (>= 1.0.2, < 2.0)

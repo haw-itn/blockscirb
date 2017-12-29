@@ -18,32 +18,43 @@ module BlockSci
           # TODO
         end
 
-        first_file_num = file_num
         max_file_num = max_block_file_num
         file_count = max_file_num - file_num
         file_done = 0
-        valid_magic_head = Bitcoin.chain_params.magic_head
+        valid_magic_head = Bitcoin.chain_params.magic_head.htb
         blocks = []
 
-        file_count.times do
-          puts 'fetch block start.'
-          File.open(configuration.path_for_block_file(file_num)) do |f|
+        files = []
+        file_count.times do |i|
+          files << configuration.path_for_block_file(file_num + i)
+        end
+
+        puts 'fetch block start.'
+        result = Parallel.map(files, in_processes: 4, finish: -> (item, i, result){
+          file_done += 1
+          print "\r#{((file_done.to_f / file_count) * 100).to_i}% done fetching block."
+        }) do |file|
+          File.open(file) do |f|
+            first_file = file == files.first
+            last_file = file == files.last
             io = StringIO.new(f.read)
-            io.pos = file_pos if first_file_num == file_num && file_pos > 0
+            io.pos = file_pos if first_file && file_pos > 0
             until io.eof?
               current_block_pos = io.pos
               magic_head, size = io.read(8).unpack("a4I")
-              raise 'magic bytes is mismatch.' unless magic_head.bth == valid_magic_head
-              block = BlockSci::Parser::BlockInfo.parse_from_raw_data(io, size, file_num, current_block_pos)
+              unless magic_head == valid_magic_head
+                break if last_file && current_block_pos > 0
+                raise 'magic bytes is mismatch.'
+              end
+              block = BlockSci::Parser::BlockInfo.parse_from_raw_data(io, size, to_file_num(file), current_block_pos)
               @block_list[block.hash] = block
               blocks << block
             end
+            blocks.last if last_file && !blocks.empty?
           end
-          file_done += 1
-          file_num += 1
-          print "\r#{((file_done.to_f / file_count) * 100).to_i}% done fetching block."
-          @newest_block = blocks.last if file_num == max_file_num && !blocks.empty?
         end
+        @newest_block = result.compact.first
+
         puts
       end
 
@@ -56,6 +67,11 @@ module BlockSci
           file_num += 1
         end
         file_num
+      end
+
+      def to_file_num(file_name)
+        num = file_name.slice(file_name.index('blk') + 3, 5)
+        num.to_i if num
       end
 
     end

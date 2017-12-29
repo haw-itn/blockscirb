@@ -23,6 +23,7 @@ RSpec.describe BlockSci::Parser::ChainIndex do
         expect(subject.newest_block.input_count).to eq(23) # not count coinbase
         expect(subject.newest_block.output_count).to eq(28)
         expect(subject.newest_block.size).to eq(4672)
+        expect(subject.newest_block.file_num).to eq(0)
         expect(subject.newest_block.header.to_payload.bth).to eq('02000000fc35cb8f9549857cc120df7682e5686e0f07265eee08a8ce42e46a39000000006ca7b08894a31985f560ac78a45a7784d4edd36851723085de1bcc31840ae4899316be51c0ff3f1cf41d5909')
       end
     end
