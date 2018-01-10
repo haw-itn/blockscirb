@@ -47,7 +47,7 @@ module BlockSci
       private
 
       def init_dir
-        FileUtils.mkdir_p(out_dir) unless Dir.exist?(out_dir)
+        FileUtils.mkdir_p([out_dir, parser_dir])
       end
 
       # change coin network from coin dirname.
