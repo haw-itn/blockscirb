@@ -29,8 +29,12 @@ module BlockSci
           files << configuration.path_for_block_file(file_num + i)
         end
 
+        forward_hashes = {}
+
         puts 'fetch block start.'
-        result = Parallel.map(files, in_processes: 4, finish: -> (item, i, result){
+        Parallel.map(files, in_processes: 4, finish: -> (item, i, result){
+          @newest_block = result.last if i == files.length - 1
+          result.each{|b| @block_list[b.hash] = b}
           file_done += 1
           print "\r#{((file_done.to_f / file_count) * 100).to_i}% done fetching block."
         }) do |file|
@@ -47,13 +51,28 @@ module BlockSci
                 raise 'magic bytes is mismatch.'
               end
               block = BlockSci::Parser::BlockInfo.parse_from_raw_data(io, size, to_file_num(file), current_block_pos)
-              @block_list[block.hash] = block
               blocks << block
             end
-            blocks.last if last_file && !blocks.empty?
+            blocks
           end
         end
-        @newest_block = result.compact.first
+
+        @block_list.each do |h, b|
+          forward_hashes[b.header.prev_hash] = b
+        end
+
+        hash_index = Bitcoin.chain_params.genesis_block.header.hash
+        height = 0
+        until hash_index.nil?
+          height += 1
+          b = forward_hashes[hash_index]
+          if b
+            b.height = height
+            hash_index = b.hash
+          else
+            hash_index = nil
+          end
+        end
 
         puts
       end
