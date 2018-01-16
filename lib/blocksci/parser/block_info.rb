@@ -42,6 +42,22 @@ module BlockSci
         self.new(header, size, tx_count, tx_in, tx_out, file_num, file_pos)
       end
 
+      # parse BlockInfo data from io.
+      def self.parse_from_io(io)
+        io.read(32) # hash
+        header = Bitcoin::BlockHeader.parse_from_payload(io.read(80))
+        height = Bitcoin.unpack_var_int_from_io(io)
+        size = Bitcoin.unpack_var_int_from_io(io)
+        tx_count = Bitcoin.unpack_var_int_from_io(io)
+        input_count = Bitcoin.unpack_var_int_from_io(io)
+        output_count = Bitcoin.unpack_var_int_from_io(io)
+        file_num = Bitcoin.unpack_var_int_from_io(io)
+        file_pos = Bitcoin.unpack_var_int_from_io(io)
+        b = self.new(header, size, tx_count, input_count, output_count, file_num, file_pos)
+        b.height = height
+        b
+      end
+
       def to_payload
         block_hash.htb << header.to_payload << Bitcoin.pack_var_int(height) << Bitcoin.pack_var_int(size) <<
             Bitcoin.pack_var_int(tx_count) << Bitcoin.pack_var_int(input_count) <<
