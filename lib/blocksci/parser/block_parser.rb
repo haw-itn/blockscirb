@@ -13,6 +13,7 @@ module BlockSci
       def update_chain
         chain_index = BlockSci::Parser::ChainIndex.new(configuration)
         chain_index.update
+        chain_index.write_to_file
       end
 
     end

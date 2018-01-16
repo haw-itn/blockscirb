@@ -11,6 +11,16 @@ module BlockSci
         @block_list = {}
       end
 
+      # parse loaded Chain Index
+      def self.parse_from_disk(configuration)
+        file = configuration.block_list_path
+        chain_index = self.new(configuration)
+        if File.exist?(file)
+
+        end
+        chain_index
+      end
+
       def update
         file_num = 0
         file_pos = 0
@@ -19,7 +29,8 @@ module BlockSci
         end
 
         max_file_num = max_block_file_num
-        file_count = max_file_num - file_num
+        # max_file_num = 1
+        file_count = max_file_num - file_num + 1
         file_done = 0
         valid_magic_head = Bitcoin.chain_params.magic_head.htb
         blocks = []
@@ -34,8 +45,10 @@ module BlockSci
         puts 'fetch block start.'
         Parallel.map(files, in_processes: 4, finish: -> (item, i, result){
           @newest_block = result.last if i == files.length - 1
-          result.each{|b| @block_list[b.hash] = b}
           file_done += 1
+          result.each do |b|
+            @block_list[b.block_hash] = b
+          end
           print "\r#{((file_done.to_f / file_count) * 100).to_i}% done fetching block."
         }) do |file|
           File.open(file) do |f|
@@ -56,27 +69,48 @@ module BlockSci
             blocks
           end
         end
+        puts
 
         @block_list.each do |h, b|
-          forward_hashes[b.header.prev_hash] = b
-        end
-
-        hash_index = Bitcoin.chain_params.genesis_block.header.hash
-        height = 0
-        until hash_index.nil?
-          height += 1
-          b = forward_hashes[hash_index]
-          if b
-            b.height = height
-            hash_index = b.hash
+          if forward_hashes[b.header.prev_hash]
+            forward_hashes[b.header.prev_hash] << h
           else
-            hash_index = nil
+            forward_hashes[b.header.prev_hash] = [h]
           end
         end
 
-        puts
+        puts 'set block height'
+
+        genesis_hash = Bitcoin.chain_params.genesis_block.header.hash
+        block_list[genesis_hash].height = 0
+
+        queue = [[genesis_hash, 0]]
+
+        until queue.empty?
+          block_hash, height = queue.pop
+          if forward_hashes[block_hash]
+            forward_hashes[block_hash].each do|next_hash|
+              block = block_list[next_hash]
+              block.height = height + 1
+              queue << [block.block_hash, block.height]
+            end
+          end
+        end
+
       end
 
+      # write chain index to file.
+      # The file is a binary file, and payload of +block_list+ and +newest_block+ are stored.
+      def write_to_file
+        File.open(configuration.block_list_path, 'w') do |f|
+          block_list.each do |k, b|
+            # next unless b.height
+            f.write(b.to_payload)
+            f.flush
+          end
+          f.write(newest_block.to_payload)
+        end
+      end
 
       private
 
@@ -85,7 +119,7 @@ module BlockSci
         while File.exist?(configuration.path_for_block_file(file_num))
           file_num += 1
         end
-        file_num
+        file_num - 1
       end
 
       def to_file_num(file_name)

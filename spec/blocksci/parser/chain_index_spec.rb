@@ -5,7 +5,7 @@ RSpec.describe BlockSci::Parser::ChainIndex do
   describe '#max_block_file_num' do
     subject {BlockSci::Parser::ChainIndex.new(test_configuration)}
     it 'should return existing block file count' do
-      expect(subject.send(:max_block_file_num, 0)).to eq(1)
+      expect(subject.send(:max_block_file_num, 0)).to eq(0)
     end
   end
 
@@ -13,12 +13,11 @@ RSpec.describe BlockSci::Parser::ChainIndex do
     context 'load file' do
       subject {
         index = BlockSci::Parser::ChainIndex.new(test_configuration)
-        allow(index).to receive(:max_block_file_num).and_return(1)
         index.update
         index
       }
       it 'should parse block' do
-        expect(subject.newest_block.hash).to eq('000000002e00e366a9371454b5aef5363a298f88927e2e8a248971668ef24893')
+        expect(subject.newest_block.block_hash).to eq('000000002e00e366a9371454b5aef5363a298f88927e2e8a248971668ef24893')
         expect(subject.newest_block.tx_count).to eq(13)
         expect(subject.newest_block.input_count).to eq(23) # not count coinbase
         expect(subject.newest_block.output_count).to eq(28)

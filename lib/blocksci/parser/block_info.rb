@@ -6,7 +6,7 @@ module BlockSci
       attr_accessor :file_num # Which # file this block is stored in (blk?????.dat)
       attr_accessor :file_pos # Byte offset within blk?????.dat where this block's data is stored
 
-      attr_accessor :hash
+      attr_accessor :block_hash
       attr_accessor :header
       attr_accessor :height # height of the entry in the chain. The genesis block has height 0
       attr_accessor :size
@@ -18,7 +18,7 @@ module BlockSci
       # @param [Integer] file_num Which  file this block is stored in (blk?????.dat)
       # @param [Integer] file_pos Byte offset within blk?????.dat where this block's data is stored
       def initialize(header, size, tx_count, tx_in, tx_out,file_num, file_pos)
-        @hash = header.hash
+        @block_hash = header.hash
         @header = header
         @size = size
         @tx_count = tx_count
@@ -40,6 +40,12 @@ module BlockSci
         end
         tx_in -= 1 # remove coinbase
         self.new(header, size, tx_count, tx_in, tx_out, file_num, file_pos)
+      end
+
+      def to_payload
+        block_hash.htb << header.to_payload << Bitcoin.pack_var_int(height) << Bitcoin.pack_var_int(size) <<
+            Bitcoin.pack_var_int(tx_count) << Bitcoin.pack_var_int(input_count) <<
+            Bitcoin.pack_var_int(output_count) << Bitcoin.pack_var_int(file_num) << Bitcoin.pack_var_int(file_pos)
       end
 
       private
