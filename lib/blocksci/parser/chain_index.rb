@@ -37,7 +37,7 @@ module BlockSci
 
         unless block_list.empty?
           file_num = newest_block.file_num
-          file_pos = newest_block.file_pos + newest_block.size
+          file_pos = newest_block.file_pos + newest_block.size + 8 # add magic byte size
         end
 
         max_file_num = max_block_file_num
