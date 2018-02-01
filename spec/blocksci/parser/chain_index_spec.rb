@@ -5,11 +5,10 @@ RSpec.describe BlockSci::Parser::ChainIndex do
   describe '#max_block_file_num' do
     subject {BlockSci::Parser::ChainIndex.new(test_configuration)}
     it 'should return existing block file count' do
-      # expect(subject.send(:max_block_file_num, 0)).to eq(0)
+      expect(subject.send(:max_block_file_num, 0)).to eq(0)
     end
   end
 
-=begin
   describe '#update' do
     context 'load file' do
       subject {
@@ -18,17 +17,17 @@ RSpec.describe BlockSci::Parser::ChainIndex do
         index
       }
       it 'should parse block' do
-        expect(subject.newest_block.block_hash).to eq('000000002e00e366a9371454b5aef5363a298f88927e2e8a248971668ef24893')
-        expect(subject.newest_block.tx_count).to eq(13)
-        expect(subject.newest_block.input_count).to eq(23) # not count coinbase
-        expect(subject.newest_block.output_count).to eq(28)
-        expect(subject.newest_block.size).to eq(4672)
+        expect(subject.newest_block.block_hash).to eq('281dcd1e9124deef18140b754eab0550c46d6bd55e815415266c89d8faaf1f2d')
+        expect(subject.newest_block.tx_count).to eq(4)
+        expect(subject.newest_block.input_count).to eq(3) # not count coinbase
+        expect(subject.newest_block.output_count).to eq(8)
+        expect(subject.newest_block.size).to eq(870)
         expect(subject.newest_block.file_num).to eq(0)
-        expect(subject.newest_block.header.to_payload.bth).to eq('02000000fc35cb8f9549857cc120df7682e5686e0f07265eee08a8ce42e46a39000000006ca7b08894a31985f560ac78a45a7784d4edd36851723085de1bcc31840ae4899316be51c0ff3f1cf41d5909')
+        expect(subject.newest_block.height).to eq(102)
+        expect(subject.newest_block.header.to_payload.bth).to eq('000000209986299405bf4e5e9964a3baf8e0373fc44d8dfdc7acea198dc1e48445bd083c54da248b4ebfaee36446a981034f3e3e1ae3298c07b793d5e51b5d6c47dea947e29f725affff7f2000000000')
       end
     end
 
   end
-=end
 
 end

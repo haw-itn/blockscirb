@@ -14,5 +14,5 @@ RSpec.configure do |config|
 end
 
 def test_configuration
-  BlockSci::Parser::Configuration.new("#{Dir.tmpdir}/blocksci", File.join(File.dirname(__FILE__), 'fixtures/testnet3'))
+  BlockSci::Parser::Configuration.new("#{Dir.tmpdir}/blocksci", File.join(File.dirname(__FILE__), 'fixtures/regtest'))
 end
