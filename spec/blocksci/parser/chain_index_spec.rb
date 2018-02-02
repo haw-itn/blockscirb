@@ -30,4 +30,20 @@ RSpec.describe BlockSci::Parser::ChainIndex do
 
   end
 
+  describe '#write_to_file' do
+    context 'after load file' do
+      subject {
+        File.delete("#{test_configuration.block_list_path}") if File.exist?("#{test_configuration.block_list_path}")
+        index = BlockSci::Parser::ChainIndex.parse_from_disk(test_configuration)
+        index.update
+        index
+      }
+
+      it 'should write out blockList.dat' do
+        subject.write_to_file
+        expect(File.exist?("#{subject.config.block_list_path}")).to be_truthy
+      end
+    end
+  end
+
 end
