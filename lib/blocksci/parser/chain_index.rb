@@ -5,6 +5,7 @@ module BlockSci
       attr_reader :config
       attr_accessor :block_list
       attr_accessor :newest_block
+      attr_accessor :old_newest_block
 
       def initialize(config)
         @config = config
@@ -22,7 +23,7 @@ module BlockSci
             until io.eof?
               block_info = BlockSci::Parser::BlockInfo.parse_from_io(io)
               chain_index.block_list[block_info.block_hash] = block_info
-              chain_index.newest_block = block_info if io.eof?
+              chain_index.newest_block = chain_index.old_newest_block = block_info if io.eof?
               print "\r#{((io.pos.to_f / size) * 100).to_i}% done load parsed block."
             end
             puts
@@ -115,8 +116,10 @@ module BlockSci
       # write chain index to file.
       # The file is a binary file, and payload of +block_list+ and +newest_block+ are stored.
       def write_to_file
-        File.open(config.block_list_path, 'w') do |f|
-          block_count = block_list.size
+        File.open(config.block_list_path, 'a') do |f|
+          block_count = old_newest_block ? (block_list.size - old_newest_block.height - 1) : block_list.size
+          block_list = self.block_list.sort{|(k1, v1), (k2, v2)| v1.height <=> v2.height}
+          block_list = block_list[(old_newest_block.height + 1)..-1] if old_newest_block
           block_list.each_with_index do |(k, b), index|
             f.write(b.to_payload)
             f.flush
