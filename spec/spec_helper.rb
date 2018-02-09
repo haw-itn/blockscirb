@@ -16,3 +16,7 @@ end
 def test_configuration
   BlockSci::Parser::Configuration.new("#{Dir.tmpdir}/blocksci", File.join(File.dirname(__FILE__), 'fixtures/regtest'))
 end
+
+def test_data_configuration(dir)
+  BlockSci::Util::DataConfiguration.new(dir)
+end
