@@ -15,6 +15,7 @@ module BlockSci
         latest_block = chain_index.newest_block ? chain_index.newest_block.height : 0
         chain_index.update
         chain_index.write_to_file if latest_block != chain_index.newest_block.height
+        chain_index
       end
 
     end
