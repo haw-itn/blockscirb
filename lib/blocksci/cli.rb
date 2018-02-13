@@ -10,7 +10,13 @@ module BlockSci
       configuration = BlockSci::Parser::Configuration.new(File.expand_path(options[:output_directory]), File.expand_path(options[:coin_directory]))
       parser = BlockSci::Parser::BlockParser.new(configuration)
       parser.update_chain
+      data_configuration = BlockSci::Chain::DataConfiguration.new(File.expand_path(options[:output_directory]))
+      starting_tx_count = get_starting_tx_count(data_configuration)
     end
 
+    private
+    def get_starting_tx_count(config)
+      return 0
+    end
   end
 end
