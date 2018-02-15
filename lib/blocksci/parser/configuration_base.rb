@@ -1,15 +1,14 @@
 module BlockSci
   module Parser
-    class ConfigurationBase
-      attr_reader :out_dir
+    class ConfigurationBase < BlockSci::Util::DataConfiguration
 
-      def initialize(out_dir)
-        @out_dir = out_dir
+      def initialize(data_directory_)
+        super(data_directory_)
         init_dir
       end
 
       def parser_dir
-        "#{out_dir}/parser"
+        "#{data_directory}/parser"
       end
 
       def utxo_cache_file
@@ -39,7 +38,7 @@ module BlockSci
       private
 
       def init_dir
-        FileUtils.mkdir_p([out_dir, parser_dir])
+        FileUtils.mkdir_p([parser_dir])
       end
 
     end
