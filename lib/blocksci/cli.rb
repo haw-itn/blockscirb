@@ -6,12 +6,17 @@ module BlockSci
     desc 'update', 'Update all BlockSci data'
     option :output_directory, required: true
     option :coin_directory, required: true
+    option :max_block
     def update
+      max_block_num = options[:max_block] || 0
       configuration = BlockSci::Parser::Configuration.new(File.expand_path(options[:output_directory]), File.expand_path(options[:coin_directory]))
       parser = BlockSci::Parser::BlockParser.new(configuration)
-      chain_blocks = parser.update_chain
+      chain_blocks = parser.update_chain(max_block_num)
+      blocks_to_add = chain_blocks[0+split_point..-1]
+      return if blocks_to_add.size == 0
+
       starting_tx_count = get_starting_tx_count(configuration)
-      max_block_height = chain_blocks.newest_block.height
+      max_block_height = blocks_to_add[-1].height
 
       total_tx_count = 0
       total_input_count = 0
@@ -22,7 +27,6 @@ module BlockSci
         total_output_count += block.output_count
       end
 
-      blocks_to_add = chain_blocks.block_list.sort{|(k1, v1), (k2, v2)| v1.height <=> v2.height}.map(&:last)
       processor = BlockSci::Parser::BlockProcessor.new(starting_tx_count, total_tx_count, max_block_height)
 
       it = blocks_to_add[0]

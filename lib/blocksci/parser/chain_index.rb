@@ -130,6 +130,37 @@ module BlockSci
         end
       end
 
+      def generate_chain(max_block_height)
+        chain = []
+        max_height = 0
+        max_height_block = nil
+        block_list.each do |hash, block|
+          if block.height > max_height
+            max_height_block = block
+            max_height = block.height
+          end
+        end
+
+        return chain if max_height_block.nil?
+
+        hash = max_height_block.block_hash
+
+        while hash != Bitcoin.chain_params.genesis_block.header.hash
+          block = block_list[hash]
+          chain << block
+          hash = Bitcoin::BlockHeader.parse_from_payload(block.header.to_payload).prev_hash
+        end
+
+        chain.reverse!
+        if max_block_height < 0
+          return chain[0..(chain.size-1+max_block_height)]
+        elsif max_block_height == 0 || max_block_height > chain.size
+          return chain
+        else
+          return chain[0..max_block_height]
+        end
+      end
+
       private
 
       def max_block_file_num(start_file = 0)
