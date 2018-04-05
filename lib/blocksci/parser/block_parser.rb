@@ -44,6 +44,16 @@ module BlockSci
         end
       end
 
+      def rollback_transactions(block_keep_count, config)
+        block_file = BlockSci::Util::FixedSizeFileMapper.new(config.block_file_path)
+        block_keep_size = block_keep_count
+        if block_file.size > block_keep_size
+          first_deleted_block = block_file.get_data(block_keep_size)
+          first_deleted_tx_num = first_deleted_block.first_tx_index
+
+          block_file.truncate(block_keep_size)
+        end
+      end
 
       private
       def chain_blocks(max_block_num)
