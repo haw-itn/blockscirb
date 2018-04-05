@@ -45,6 +45,7 @@ module BlockSci
       end
 
 
+      private
       def chain_blocks(max_block_num)
         chain_index = BlockSci::Parser::ChainIndex.parse_from_disk(configuration)
         latest_block = chain_index.newest_block ? chain_index.newest_block.height : 0
@@ -54,7 +55,6 @@ module BlockSci
         blocks
       end
 
-      private
       def split_point(max_block_num)
         old_chain = BlockSci::Chain::ChainAccess.new(configuration)
         chain_blocks = chain_blocks(max_block_num)
