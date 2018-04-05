@@ -56,7 +56,13 @@ module BlockSci
 
       private
       def get_starting_tx_count(config)
-        return 0
+        chain = BlockSci::Chain::ChainAccess.new(config)
+        if chain.block_count > 0
+          last_block = chain.get_block(chain.block_count - 1)
+          return last_block.first_tx_index + last_block.num_txes
+        else
+          return 0
+        end
       end
     end
 
