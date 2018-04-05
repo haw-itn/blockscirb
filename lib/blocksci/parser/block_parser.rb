@@ -55,6 +55,26 @@ module BlockSci
       end
 
       private
+      def split_point(max_block_num)
+        old_chain = BlockSci::Chain::ChainAccess.new(configuration)
+        chain_blocks = chain_blocks(max_block_num)
+        max_size = [old_chain.block_count, chain_blocks.size].min
+        split_point = max_size
+        max_size.times do |i|
+          old_hash = old_chain.get_block(max_size - 1 - i).hash
+          new_hash = chain_blocks[max_size - 1 - i].hash
+          unless old_hash == new_hash
+            split_point = max_size - 1 - i
+            break
+          end
+        end
+        print "Starting with chain of #{old_chain.block_count} blocks\n"
+        print "Removing #{old_chain.block_count - split_point} blocks\n"
+        print "Adding #{chain_blocks.size - split_point} blocks\n"
+
+        split_point
+      end
+
       def get_starting_tx_count(config)
         chain = BlockSci::Chain::ChainAccess.new(config)
         if chain.block_count > 0
