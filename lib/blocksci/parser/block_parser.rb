@@ -14,6 +14,9 @@ module BlockSci
         chain_blocks = chain_blocks(max_block_num)
         split_point = split_point(max_block_num)
         blocks_to_add = chain_blocks[0+split_point..-1]
+
+        rollback_transactions(split_point, config)
+
         return if blocks_to_add.size == 0
 
         starting_tx_count = get_starting_tx_count(configuration)
