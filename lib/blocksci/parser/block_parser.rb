@@ -25,7 +25,7 @@ module BlockSci
         total_tx_count = 0
         total_input_count = 0
         total_output_count = 0
-        blocks_to_add.each do |(k, block)|
+        blocks_to_add.each do |block|
           total_tx_count += block.tx_count
           total_input_count += block.input_count
           total_output_count += block.output_count
