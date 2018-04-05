@@ -2,11 +2,16 @@ module BlockSci
   module Util
     class DataConfiguration
 
+      attr_accessor :error_on_reorg
+      attr_accessor :blocks_ignored
+
       attr_reader :data_directory
       attr_reader :pubkey_prefix
       attr_reader :script_prefix
 
       def initialize(data_directory_)
+        @error_on_reorg = false
+        @blocks_ignored = 0
         @data_directory = data_directory_
         create_directory
         init_prefix
