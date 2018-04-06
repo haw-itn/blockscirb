@@ -10,7 +10,7 @@ module BlockSci
       attr_accessor :blocks_ignored
 
       def initialize(config)
-        @block_file = BlockSci::Util::FixedSizeFileMapper.new(config)
+        @block_file = BlockSci::Util::FixedSizeFileMapper.new(config.block_file_path)
         @blocks_ignored = config.blocks_ignored
         _setup
       end

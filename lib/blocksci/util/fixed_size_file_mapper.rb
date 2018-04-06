@@ -7,8 +7,8 @@ module BlockSci
 
       UNITSIZE = 76
 
-      def initialize(config)
-        @data_file = config.block_file_path + ".dat"
+      def initialize(path)
+        @data_file = path + ".dat"
         @file_end = File.exists?(data_file) ? File.size(data_file) : 0
       end
 

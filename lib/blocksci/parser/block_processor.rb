@@ -182,9 +182,8 @@ module BlockSci
       attr_accessor :sequence_file
 
       def initialize(config)
-        config = BlockSci::Parser::ConfigurationBase.new(config.data_directory)
         @block_coinbase_file = config.block_coinbase_file_path
-        @block_file = config.block_file_path
+        @block_file = BlockSci::Util::FixedSizeFileMapper.new(config.block_file_path)
         @sequence_file = config.sequence_file_path
       end
 
