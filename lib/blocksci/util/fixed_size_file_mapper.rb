@@ -5,7 +5,7 @@ module BlockSci
       attr_reader :data_file
       attr_accessor :file_end
 
-      UNITSIZE = 80
+      UNITSIZE = 76
 
       def initialize(config)
         @data_file = config.block_file_path + ".dat"
@@ -14,7 +14,7 @@ module BlockSci
 
       def size
         # return block height by calculate byte size
-        File.size(data_file) / UNITSIZE
+        file_end / UNITSIZE
       end
 
       def get_pos(index)
