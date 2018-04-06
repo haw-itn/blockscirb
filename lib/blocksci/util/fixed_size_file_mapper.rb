@@ -9,7 +9,10 @@ module BlockSci
 
       def initialize(path)
         @data_file = path + ".dat"
-        @file_end = File.exists?(data_file) ? File.size(data_file) : 0
+        unless File.exists?(data_file)
+          File.open(data_file, "w"){}
+        end
+        @file_end = File.size(data_file)
       end
 
       def size
@@ -36,7 +39,7 @@ module BlockSci
       end
 
       def write(block)
-        File.open(data_file, "w") do |f|
+        File.open(data_file, "a") do |f|
           f.write(block.to_payload)
         end
       end
