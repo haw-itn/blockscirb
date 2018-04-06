@@ -76,7 +76,7 @@ module BlockSci
         split_point = max_size
         max_size.times do |i|
           old_hash = old_chain.get_block(max_size - 1 - i).hash
-          new_hash = chain_blocks[max_size - 1 - i].hash
+          new_hash = chain_blocks[max_size - 1 - i].block_hash
           unless old_hash == new_hash
             split_point = max_size - 1 - i
             break
