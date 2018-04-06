@@ -44,6 +44,10 @@ module BlockSci
 
         new(first_tx_index, num_txes, height, hash, version, timestamp, bits, nonce, real_size, base_size, coinbase_offset)
       end
+
+      def to_payload
+        [first_tx_index, num_txes, height, hash, version, timestamp, bits, nonce, real_size, base_size, coinbase_offset].pack('VVVH64VVVVVVQ')
+      end
     end
   end
 end
