@@ -145,7 +145,7 @@ module BlockSci
 
         hash = max_height_block.block_hash
 
-        while hash != Bitcoin.chain_params.genesis_block.header.hash
+        while hash != Bitcoin.chain_params.genesis_block.header.prev_hash
           block = block_list[hash]
           chain << block
           hash = Bitcoin::BlockHeader.parse_from_payload(block.header.to_payload).prev_hash
