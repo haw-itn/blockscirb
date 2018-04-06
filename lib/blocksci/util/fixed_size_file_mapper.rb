@@ -34,6 +34,12 @@ module BlockSci
       def truncate(index)
         File.truncate(data_file, get_pos(index))
       end
+
+      def write(block)
+        File.open(data_file, "w") do |f|
+          f.write(block.to_payload)
+        end
+      end
     end
   end
 end
