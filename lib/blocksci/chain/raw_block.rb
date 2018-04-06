@@ -40,7 +40,7 @@ module BlockSci
         nonce = io.read(4).unpack('V')
         real_size = io.read(4).unpack('V')
         base_size = io.read(4).unpack('V')
-        coinbase_offset = io.read(4).unpack('Q')
+        coinbase_offset = io.read(8).unpack('Q')
 
         new(first_tx_index, num_txes, height, hash, version, timestamp, bits, nonce, real_size, base_size, coinbase_offset)
       end
