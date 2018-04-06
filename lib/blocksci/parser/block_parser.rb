@@ -15,7 +15,7 @@ module BlockSci
         split_point = split_point(max_block_num)
         blocks_to_add = chain_blocks[0+split_point..-1]
 
-        rollback_transactions(split_point, config)
+        rollback_transactions(split_point, configuration)
 
         return if blocks_to_add.size == 0
 
@@ -33,18 +33,17 @@ module BlockSci
 
         processor = BlockSci::Parser::BlockProcessor.new(starting_tx_count, total_tx_count, max_block_height)
 
-        it = blocks_to_add[0]
-        last = blocks_to_add[-1]
+        it = blocks_to_add.index(blocks_to_add[0])
+        last = blocks_to_add.index(blocks_to_add[-1])
 
         while it != last do
           prev = it
           new_tx_count = 0
-          it.height.upto(blocks_to_add.size-1) do |i|
-            break unless new_tx_count < 10000000 && it != last
-            new_tx_count += it.tx_count
-            it = blocks_to_add[i+1]
+          while new_tx_count < 10000000 && it != last
+            new_tx_count += blocks_to_add[it].tx_count
+            it += 1
           end
-          next_blocks = [prev, it]
+          next_blocks = blocks_to_add[prev..it]
           processor.add_new_blocks(configuration, next_blocks)
         end
       end
