@@ -5,7 +5,6 @@ module BlockSci
       attr_accessor :current_tx_num
       attr_accessor :total_tx_count
       attr_accessor :max_block_height
-      attr_reader :files
 
       def initialize(starting_tx_count, total_tx_count, max_block_height)
         @starting_tx_count = starting_tx_count
@@ -19,12 +18,12 @@ module BlockSci
         reader = importer(config, blocks)
       end
 
+      private
       def importer(config, blocks)
-        load_finished_tx = method(:load_finished_tx)
         file_reader = BlockSci::Parser::BlockFileReader.new(config, blocks, current_tx_num)
-        @files = BlockSci::Parser::NewBlocksFiles.new(config)
+        files = BlockSci::Parser::NewBlocksFiles.new(config)
 
-        blocks.each_with_index do |block, i|
+        blocks.each do |block|
           file_reader.next_block(block, current_tx_num)
           read_new_block(current_tx_num, block, file_reader, files)
           @current_tx_num += block.tx_count
@@ -36,23 +35,32 @@ module BlockSci
         coinbase = []
         is_segwit = false
         null_hash = nil
-        inputs = []
-        File.open(file_reader.config.path_for_block_file(block.file_num)) do |f|
-          io = StringIO.new(f.read)
-          break if io.eof?
-          magic_head, size = io.read(8).unpack("a4I")
-          header = Bitcoin::BlockHeader.parse_from_payload(io.read(80))
-          Bitcoin.unpack_var_int_from_io(io)
-          block.tx_count.times do |j|
-            inputs << file_reader.parse_tx_header(io)
-          end
+        header_size = 80 + varialbe_length_int_size(block.tx_count)
+        base_size = header_size
+        real_size = header_size
+        block.tx_count.times do |i|
+          # calculate transactions func
         end
-        files.write_to_file(inputs)
+        raw_block = BlockSci::Chain::RawBlock.new(firts_tx_num, block.tx_count, block.height, block.block_hash, block.header.version, block.header.time, block.header.bits, block.header.nonce, real_size, base_size, 0)
+        firts_tx_num += block.tx_count
+        files.block_file.write(raw_block)
+
+        return coinbase
       end
 
-      private
       def load_finished_tx(tx)
+      end
 
+      def varialbe_length_int_size(n)
+        if n < 253
+          return 1
+        elsif n <= 65535
+          return 3
+        elsif n <= 4294967295
+          return 5
+        else
+          return 9
+        end
       end
 
     end
@@ -64,6 +72,9 @@ module BlockSci
 
       attr_accessor :current_height
       attr_accessor :current_tx_num
+
+      MAGIC_BYTE = 8
+      BLOCK_HEADER_SIZE = 80
 
       def initialize(config, blocks_to_add, first_tx_num)
         @last_tx_required = {}
@@ -77,18 +88,21 @@ module BlockSci
 
       def next_block(block, first_tx_num)
         file_it = files.assoc(block.file_num)
-        if file_it == files.last || file_it.nil?
+        if file_it.nil?
           block_path = config.path_for_block_file(block.file_num)
           raise ("Error: Failed to open block file " + block_path) unless File.exist?(block_path)
           files << [block.file_num, [block_path, last_tx_required[block.file_num]]]
         end
-        File.open(files.assoc(block.file_num)[1].first) do |f|
+        File.open(files.assoc(block.file_num)[1][0]) do |f|
           file_pos = f.pos + block.file_pos
           io = StringIO.new(f.read)
-          io.pos = file_pos
-          current_block_pos = io.pos
-          magic_head, size = io.read(8).unpack("a4I")
-          BlockSci::Parser::BlockInfo.parse_from_raw_data(io, size, block.file_num, current_block_pos)
+          io.seek(0, IO::SEEK_END)
+          if (BLOCK_HEADER_SIZE + MAGIC_BYTE) <= (io.pos - file_pos)
+            io.pos = file_pos
+            io.pos += BLOCK_HEADER_SIZE + MAGIC_BYTE
+          else
+            raise 'Tried to advance past end of file'
+          end
         end
         @current_height = block.height
         @current_tx_num = first_tx_num
